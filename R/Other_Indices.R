@@ -1,6 +1,6 @@
 #' PUC
 #'
-#' \code{PUC} computes the proportion of uncontaminated correlations for a bifactor mode
+#' \code{PUC} computes the proportion of uncontaminated correlations for a bifactor model
 #'
 #' \code{PUC} is called by \code{\link{bifactorIndices}} and the various convenience functions
 #' for exploratory models and/or Mplus output,
@@ -33,11 +33,11 @@
 #'
 #'
 PUC <- function(Lambda) {
-  if (!isBifactor(Lambda)) return(NULL)
+  Lambda <- make_pure_bifactor(Lambda)
   ### Count how many items are on each factor
   numItemsOnFactor <- colSums(Lambda != 0)
   ## contaminated correlations: add up n*(n-1)/2 for all factors, then subtract off the n(n-1)/2 for general factor
-  specificCorrelationCount <- sum(sapply(numItemsOnFactor, function (x) {x*(x-1)/2})) - (nrow(Lambda)*(nrow(Lambda)-1)/2)
+  specificCorrelationCount <- sum(sapply(numItemsOnFactor, function (x) {x*(x-1)/2})) - (numItemsOnFactor[1]*(numItemsOnFactor[1]-1)/2)
   ## PUC = 1 - PCC
   1 - specificCorrelationCount/(nrow(Lambda)*(nrow(Lambda)-1)/2)
 }
