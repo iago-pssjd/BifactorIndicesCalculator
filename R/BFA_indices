@@ -1,0 +1,32 @@
+#' BFA_indices
+#'
+#' Computes all available bifactor indices for the input given.
+#'
+#' @param Lambda is a matrix of factor loadings of a bifactor model
+#' assuming that the general factor is in the first column.
+#' @param UniLambda is a matrix of factor loadings of a unidimensional model. 
+#' Defaults to \code{NULL}, as \code{UniLambda} is only required if you wish to
+#' compute \code{\link{ARPB}}.
+#' @return A list of bifactor indices, including three different ECV indices, PUC,
+#' Omega, OmegaH, Factor Determinacy (FD), Construct Replicability (H) and ARPB.
+#'
+
+
+BFA_indices <- function(Lambda, UniLambda = NULL){
+  MLBFA <- numeric(3L)*NA_real_
+  names(MLBFA) <- c("ECV", "PUC", "Avg. rel. bias")
+  MLBFA["ECV"] <- BifactorIndicesCalculator::ECV_SS(Lambda)[1]
+  MLBFA["PUC"] <- PUC(Lambda)
+  ARB <- BifactorIndicesCalculator::ARPB(make_pure_bifactor(Lambda), UniLambda) 
+  if(!is.null(ARB)) MLBFA["Avg. rel. bias"] <- ARB[[1]]
+  
+  Phi <- diag(nrow = ncol(Lambda))
+  
+  FBFA <- cbind(omega_S(Lambda),omega_H(Lambda), BifactorIndicesCalculator::FD(Lambda, Phi), BifactorIndicesCalculator::H(Lambda))
+  colnames(FBFA) <- c("\u03c9", "\u03c9_H", "FD", "H")
+  rownames(FBFA) <- c("General factor", paste("Subscale", seq_len(nrow(matrix(omega_S(Lambda))))[-1] - 1))
+  BFA <- list()
+  BFA[["Model bifactor indices"]] <- MLBFA[!is.na(MLBFA)]
+  BFA[["General factor and subscales indices"]] <- FBFA
+  BFA
+}
