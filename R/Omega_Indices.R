@@ -54,6 +54,22 @@ Omega_S <- function(Lambda, Theta) {
   omega_results
 }
 
+omega_S <- function(Lambda){
+  Ones <- rep(1, nrow(Lambda))
+  Theta = Ones - rowSums(Lambda^2)
+  Omega_S_C <- function(Fac, Lambda, LambdaP, Theta) {
+    Lambda <- (Fac == 1)*Lambda + (Fac != 1)*LambdaP
+    inFactor <- (Fac != 1)*(Lambda[, Fac] != 0) | (Fac == 1)
+    sum(colSums(Lambda * inFactor)^2)/(sum(colSums(Lambda * inFactor)^2) + sum(Theta * inFactor))
+  }
+  LambdaP <- make_pure_bifactor(Lambda)
+  omega_results <- sapply(1:ncol(Lambda), Omega_S_C, Lambda = Lambda, LambdaP = LambdaP,
+                          Theta = Theta)
+  names(omega_results) <- colnames(Lambda)
+  omega_results
+}
+
+
 
 #' OmegaH
 #'
@@ -107,6 +123,21 @@ Omega_H <- function(Lambda, Theta) {
   }
   if (is.null(Theta)) return(NULL)
   omega_results <- sapply(1:ncol(Lambda), Omega_H_C, Lambda = Lambda, Theta = Theta)
+  names(omega_results) <- colnames(Lambda)
+  omega_results
+}
+
+omega_H <- function(Lambda){
+  Ones <- rep(1, nrow(Lambda))
+  Theta = Ones - rowSums(Lambda^2)
+  Omega_H_C <- function(Fac, Lambda, LambdaP, Theta) {
+    Lambda <- (Fac == 1)*Lambda + (Fac != 1)*LambdaP
+    inFactor <- (Fac != 1)*(Lambda[, Fac] != 0) | (Fac == 1)
+    sum(Lambda[, Fac])^2/(sum(colSums(Lambda *  inFactor)^2) + sum(Theta * inFactor))
+  }
+  LambdaP <- make_pure_bifactor(Lambda)
+  omega_results <- sapply(1:ncol(Lambda), Omega_H_C, Lambda = Lambda, LambdaP = LambdaP,
+                          Theta = Theta)
   names(omega_results) <- colnames(Lambda)
   omega_results
 }
