@@ -202,3 +202,18 @@ getGen <- function(Lambda) {
     inFactorMat <- Lambda != 0
     return(sum(rowSums(inFactorMat) > 2) == 0)
   }
+
+#' make_pure_bifactor
+#'
+#' Transforms a model to the nearest bifactor (isBifactor == TRUE) model
+#'
+#' @param Lambda Matrix of factor loadings
+#'
+#' @return A matrix of factor loadings for a bifactor model
+#'
+make_pure_bifactor <- function(Lambda) {
+  max <- matrixStats::rowMaxs(abs(Lambda), cols = -1)
+  noreplace <- sweep(abs(Lambda), 1, max, "==")
+  noreplace[, 1] <- TRUE
+  Lambda * noreplace
+}
